@@ -2,8 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Text;
+
 
 class Debtor
 {
@@ -28,11 +31,14 @@ class Debtor
         return $@"{this.FullName} \ {this.BirthDay.ToShortDateString()} \ {this.Phone} \ {this.Email} \ {this.Address} \ {this.Debt} AZN
 ";
     }
+
 }
+
+
+
 
 class Program
 {
-
 
     public static List<Debtor> debtors = new List<Debtor> {
             new Debtor("Shirley T. Qualls", DateTime.Parse("March 30, 1932"), "530-662-7732", "ShirleyTQualls@teleworm.us", "3565 Eagles Nest Drive Woodland, CA 95695", 2414),
@@ -84,10 +90,10 @@ class Program
         };
 
 
+    #region HELPER
 
 
-
-    public static (string first,string middle, string last)SplitName(string fullName)
+    public static (string first, string middle, string last) SplitName(string fullName)
     {
         var names = fullName.Split(' ');
         string firstName = names[0];
@@ -95,8 +101,80 @@ class Program
         string lastName = names[2];
 
 
-        return(firstName,middleName,lastName);
+        return (firstName, middleName, lastName);
     }
+
+
+    public static bool payDebt(Debtor debtor)
+    {
+
+        int debt = debtor.Debt;
+        int full = debt / 500;
+        int leftoverDebt = debt % 500;
+        int necessaryTimeForPay;
+        int timeUntilBirthday;
+
+        if (leftoverDebt != 0)
+            necessaryTimeForPay = full;
+        else
+            necessaryTimeForPay = full + 1;
+
+        if (debtor.BirthDay.Month <= DateTime.Now.Month)
+            timeUntilBirthday = (12 - (DateTime.Now.Month - debtor.BirthDay.Month));
+
+        else
+            timeUntilBirthday = debtor.BirthDay.Month - DateTime.Now.Month;
+
+
+        return timeUntilBirthday >= necessaryTimeForPay;
+
+    }
+
+
+
+    public static bool CheckName(Debtor d)
+    {
+        int count;
+        char symbol;
+        for (int i = 0; i < d.FullName.Length; i++)
+        {
+            count = 0;
+            symbol = d.FullName[i];
+            for (int j = 0; j < d.FullName.Length; j++)
+            {
+                if (symbol == d.FullName[j])
+                    count++;
+            }
+            if (count >= 3)
+                return true;
+        }
+        return false;
+    }
+
+
+
+    public static bool canIwrite(Debtor d, string word)
+    {
+
+        string temp_word = word;
+        StringBuilder symbol = new();
+
+        for (int i = 0; i < temp_word.Length; i++)
+        {
+            if (d.FullName.ToLower().Contains(temp_word[i]))
+            {
+                symbol.Append(temp_word[i]);
+                continue;
+            }
+            break;
+        }
+
+        return symbol.ToString() == temp_word;
+
+    }
+
+
+    #endregion
 
 
 
@@ -109,14 +187,12 @@ class Program
 
         //    2) rhyta.com ve ya dayrep.com domenlerinde emaili olan borclulari cixartmag
 
-        //debtors
-        //    .FindAll(d => d.Email.Contains("rhyta.com")||d.Email.Contains("dayrep.com"))
-        //    .ToList()
-        //    .ForEach(d => Console.WriteLine(d));
+        debtors
+            .FindAll(d => d.Email.Contains("rhyta.com")||d.Email.Contains("dayrep.com"))
+            .ToList()
+            .ForEach(d => Console.WriteLine(d));
 
         #endregion
-
-
 
 
 
@@ -124,13 +200,12 @@ class Program
 
         //3) Yashi 26-dan 36-ya qeder olan borclulari cixartmag
 
-        //    debtors
-        //.FindAll(d => (DateTime.Now.Year - d.BirthDay.Year) >= 26 && (DateTime.Now.Year - d.BirthDay.Year)<36)
-        //.ToList()
-        //.ForEach(d => Console.WriteLine(d));
+        debtors
+    .FindAll(d => (DateTime.Now.Year - d.BirthDay.Year) >= 26 && (DateTime.Now.Year - d.BirthDay.Year)<36)
+    .ToList()
+    .ForEach(d => Console.WriteLine(d));
 
         #endregion
-
 
 
 
@@ -138,60 +213,199 @@ class Program
 
         //4) Borcu 5000-den cox olmayan borclularic cixartmag
 
-        //    debtors
-        //.FindAll(d => d.Debt <= 5000)
-        //.ToList()
-        //.ForEach(d => Console.WriteLine(d));
+        debtors
+    .FindAll(d => d.Debt <= 5000)
+    .ToList()
+    .ForEach(d => Console.WriteLine(d));
 
         #endregion
 
 
 
+        #region TASK_5
+
         //5) Butov adi 18 simvoldan cox olan ve telefon nomresinde 2 ve ya 2-den cox 7 reqemi olan borclulari cixartmaq
 
+        // Debtorlar arasinda FullName -i 18 den cox olan adam olmadigi ucun >= qoydum
+
+
+        debtors
+    .FindAll(d => d.FullName.Length>=18 && d.Phone.Count(n => n=='7') >= 2)
+    .ToList()
+    .ForEach(d => Console.WriteLine(d));
+
+
+
+        #endregion
+
+
+
+        #region TASK_7
 
         //7) Qishda anadan olan borclulari cixardmaq
 
-       
+        debtors
+    .FindAll(d => d.BirthDay.Month == 12 || d.BirthDay.Month == 1 || d.BirthDay.Month == 2)
+    .ToList()
+    .ForEach(d => Console.WriteLine(d));
+
+
+        #endregion
+
+
+
         #region TASK_8
 
         //8) Borcu, umumi borclarin orta borcunnan cox olan borclulari cixarmaq ve evvel familyaya gore sonra ise meblegin azalmagina gore sortirovka etmek
 
-        //var avarage = debtors.Average(d => d.Debt);
-        //debtors
-        //    .FindAll(d => d.Debt>avarage)
-        //    .OrderBy(d => SplitName(d.FullName).last)
-        //    .ToList()
-        //    .ForEach(d => Console.WriteLine(d));
+        var avarage = debtors.Average(d => d.Debt);
+        debtors
+            .FindAll(d => d.Debt>avarage)
+            .OrderBy(d => SplitName(d.FullName).last)
+            .ToList()
+            .ForEach(d => Console.WriteLine(d));
 
         #endregion
 
 
 
+        #region TASK_9
+
         //9) Telefon nomresinde 8 olmayan borclularin yalniz familyasin, yashin ve umumi borcun meblegin cixarmaq
 
+        debtors
+    .FindAll(d => !d.Phone.Contains('8'))
+    .ToList()
+    .ForEach(d => Console.WriteLine($@"
+        Surname: {SplitName(d.FullName).last}
+        Age: {DateTime.Now.Year - d.BirthDay.Year}
+        Debt: {d.Debt} AZN"));
+
+        #endregion
+
+
+
+        #region TASK_11
 
         //11)Adinda ve familyasinda hec olmasa 3 eyni herf olan borclularin siyahisin cixarmaq ve onlari elifba sirasina gore sortirovka elemek
 
+        debtors
+    .FindAll(d => CheckName(d))
+    .OrderBy(d => d.FullName)
+    .ToList()
+    .ForEach(d => Console.WriteLine(d));
 
+        #endregion
+
+
+
+        #region TASK_13
         //13)borclulardan en coxu hansi ilde dogulubsa hemin ili cixartmaq
 
+        int temp = 0;
+        int countYear = 0;
+        int max = 0;
+        int most = 0;
+
+        for (int i = 0; i < debtors.Count; i++)
+        {
+            temp = debtors[i].BirthDay.Year;
+
+            countYear = debtors.Count(d => d.BirthDay.Year == temp);
+
+            if (countYear > max)
+            {
+                max = countYear;
+                most = temp;
+            }
+
+        }
+
+        Console.WriteLine(most);
+        #endregion
+
+
+
+        #region TASK_14
 
         //14)Borcu en boyuk olan 5 borclunun siyahisini cixartmaq
+        debtors
+            .OrderByDescending(d => d.Debt)
+            .Take(5).ToList()
+            .ForEach(d => Console.WriteLine(d));
 
+        #endregion
+
+
+
+        #region TASK_15
 
         //15)Butun borcu olanlarin borcunu cemleyib umumi borcu cixartmaq
 
+        Console.WriteLine($"{debtors.Sum(d => d.Debt)} AZN");
+
+        #endregion
+
+
+
+        #region TASK_16
 
         //16)2ci dunya muharibesin gormush borclularin siyahisi cixartmaq
 
+        debtors
+    .FindAll(d => d.BirthDay  <= new DateTime(1945, 9, 2))
+    .ToList()
+    .ForEach(d => Console.WriteLine(d));
+
+        #endregion
+
+
+
+        #region TASK_18
 
         //18)Nomresinde tekrar reqemler olmayan borclularin ve onlarin borcunun meblegin cixartmaq
 
+        // Verdiyiviz serte uygun bir sey mumkun deyil cunki telefon nomresinde 10 reqem var reqemler tekrarlanmamagi mumkun deyil
+        // Ona gore yan yana olmagina gore duzeltdim
+
+        debtors
+    .FindAll(d =>
+    {
+
+        for (int i = 0; i < d.Phone.Length - 1; i++)
+        {
+            if (d.Phone[i] == d.Phone[i+1]) return false;
+        }
+        return true;
+    }
+        )
+        .ToList()
+        .ForEach(d => Console.WriteLine(d));
+
+
+
+        #endregion
+
+
+
+        #region TASK_19
 
         //19)Tesevvur edek ki,butun borclari olanlar bugunden etibaren her ay 500 azn pul odeyecekler.Oz ad gunune kimi borcun oduyub qurtara bilenlerin siyahisin cixartmaq
 
+        debtors
+    .FindAll(d => payDebt(d))
+    .ToList()
+    .ForEach(d => Console.WriteLine(d));
 
+        #endregion
+
+
+
+        #region TASK_20
+        
         //20)Adindaki ve familyasindaki herflerden "smile" sozunu yaza bileceyimiz borclularin siyahisini cixartmaq
+        
+        debtors.FindAll(d => canIwrite(d, "smile")).ToList().ForEach(text => Console.WriteLine(text));
+        #endregion
     }
 }
